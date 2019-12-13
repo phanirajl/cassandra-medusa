@@ -14,7 +14,6 @@
 # limitations under the License.
 
 
-import collections
 import itertools
 import logging
 import os
@@ -33,10 +32,16 @@ from cassandra.policies import WhiteListRoundRobinPolicy
 from cassandra.auth import PlainTextAuthProvider
 
 
-SnapshotPath = collections.namedtuple(
-    'SnapshotPath',
-    ['path', 'keyspace', 'columnfamily']
-)
+class SnapshotPath(object):
+
+    def __init__(self, path, keyspace, table):
+        self.path = path
+        self.keyspace = keyspace
+        self.columnfamily = table
+
+    def list_files(self):
+        # important to use the _r_glob() to recursively descend into subdirs if there are any
+        return filter(lambda p: p.is_file(), self.path.rglob('*'))
 
 
 class CqlSessionProvider(object):
@@ -210,10 +215,18 @@ class CassandraConfigReader(object):
         if 'listen_address' in self._config:
             if self._config['listen_address']:
                 return self._config['listen_address']
+
+        return socket.gethostname()
+
+    @property
+    def storage_port(self):
+        if 'storage_port' in self._config:
+            if self._config['storage_port']:
+                return self._config['storage_port']
             else:
-                return socket.gethostname()
+                return "7000"
         else:
-            return 'localhost'
+            return "7000"
 
 
 class Cassandra(object):
@@ -237,6 +250,7 @@ class Cassandra(object):
             username=cassandra_config.cql_username,
             password=cassandra_config.cql_password
         )
+        self._storage_port = config_reader.storage_port
 
     def _has_systemd(self):
         try:
@@ -263,6 +277,10 @@ class Cassandra(object):
     @property
     def saved_caches_path(self):
         return self._saved_caches_path
+
+    @property
+    def storage_port(self):
+        return self._storage_port
 
     class Snapshot(object):
         def __init__(self, parent, tag):

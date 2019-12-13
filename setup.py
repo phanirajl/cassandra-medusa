@@ -21,12 +21,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='medusa',
-    version='0.1.0',
-    author='Spotify',
-    author_email='data-bye@spotify.com',
-    url='https://github.com/spotify/cassandra-medusa',
-    description='Prototype',
+    name='cassandra-medusa',
+    version='0.4.0',
+    author='The Last Pickle',
+    author_email='medusa@thelastpickle.com',
+    url='https://github.com/thelastpickle/cassandra-medusa',
+    description='Apache Cassandra backup and restore tool',
     long_description=long_description,
     long_description_content_type="text/markdown",
     license='Apache',
@@ -42,19 +42,22 @@ setuptools.setup(
     python_requires='>=3.4',
     packages=setuptools.find_packages(),
     install_requires=[
-        'Click==6.7',
-        'PyYAML==3.10',
-        'google-cloud-storage==1.7.0',
-        'cassandra-driver==3.14.0',
-        'paramiko==2.6.0',
-        'psutil==5.4.7',
-        'ffwd==0.0.2',
-        'apache-libcloud==2.4.0',
-        'python-dateutil==2.8.0',
-        'lockfile==0.12.2',
-        'pycrypto==2.6.1',
-        'retrying==1.3.3'
+        'python-dateutil<2.8.1,>=2.1',
+        'Click>=6.7',
+        'PyYAML>=5.1',
+        'cassandra-driver>=3.14.0',
+        'psutil>=5.4.7',
+        'ffwd>=0.0.2',
+        'apache-libcloud>=2.6.0',
+        'lockfile>=0.12.2',
+        'pycrypto>=2.6.1',
+        'retrying>=1.3.3',
+        'parallel-ssh==1.9.1'
     ],
+    extras_require={
+        'S3': ["awscli>=1.16.291"],
+        'GCS': ["google-cloud-storage>=1.7.0"]
+    },
     entry_points={
         'console_scripts': [
             'medusa=medusa.medusacli:cli',
